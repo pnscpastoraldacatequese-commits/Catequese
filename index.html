@@ -1,1005 +1,1007 @@
 <!DOCTYPE html>
+
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Presença por Turma</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
-        }
-        .card {
-            background-color: white;
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            max-width: 900px;
-            width: 100%;
-        }
-        .status-btn {
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border-radius: 9999px;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        .status-presente {
-            background-color: #22c55e;
-            color: white;
-            border: 2px solid #22c55e;
-        }
-        .status-falta {
-            background-color: #ef4444;
-            color: white;
-            border: 2px solid #ef4444;
-        }
-        .status-falta_justificada {
-            background-color: #f97316;
-            color: white;
-            border: 2px solid #f97316;
-        }
-        .status-falta_reposta {
-            background-color: #0ea5e9;
-            color: white;
-            border: 2px solid #0ea5e9;
-        }
-        .status-unknown {
-            background-color: #e2e8f0;
-            color: #4b5563;
-            border: 2px solid #cbd5e1;
-        }
-        @media (max-width: 640px) {
-            .card {
-                padding: 1.5rem;
-            }
-            .sm\:flex-col {
-                flex-direction: column;
-            }
-            .sm\:items-center {
-                align-items: center;
-            }
-            .sm\:w-auto {
-                width: auto;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Presença por Turma</title>
+<script src="https://www.google.com/search?q=https://cdn.tailwindcss.com"></script>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://www.google.com/search?q=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+@import url('https://www.google.com/search?q=https://fonts.googleapis.com/css2%3Ffamily%3DInter:wght%40400%3B600%3B700%26display%3Dswap');
+body {
+font-family: 'Inter', sans-serif;
+background-color: #f0f4f8;
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+padding: 1rem;
+}
+.card {
+background-color: white;
+padding: 2.5rem;
+border-radius: 1.5rem;
+box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+max-width: 900px;
+width: 100%;
+}
+.status-btn {
+transition: all 0.3s ease;
+cursor: pointer;
+border-radius: 9999px;
+padding: 0.5rem 1rem;
+font-weight: 600;
+white-space: nowrap;
+}
+.status-presente {
+background-color: #22c55e;
+color: white;
+border: 2px solid #22c55e;
+}
+.status-falta {
+background-color: #ef4444;
+color: white;
+border: 2px solid #ef4444;
+}
+.status-falta_justificada {
+background-color: #f97316;
+color: white;
+border: 2px solid #f97316;
+}
+.status-falta_reposta {
+background-color: #0ea5e9;
+color: white;
+border: 2px solid #0ea5e9;
+}
+.status-unknown {
+background-color: #e2e8f0;
+color: #4b5563;
+border: 2px solid #cbd5e1;
+}
+@media (max-width: 640px) {
+.card {
+padding: 1.5rem;
+}
+.sm:flex-col {
+flex-direction: column;
+}
+.sm:items-center {
+align-items: center;
+}
+.sm:w-auto {
+width: auto;
+}
+}
+</style>
 </head>
 <body class="bg-gray-100 p-4">
 
-    <!-- Main application container -->
-    <div class="card">
-        <h1 class="text-4xl font-extrabold text-gray-800 text-center mb-2">Controle de Presença</h1>
-        <p class="text-lg text-gray-500 text-center mb-8">
-            Registre a presença e falta dos catequizandos.
-        </p>
+<!-- Main application container -->
+<div class="card">
+    <h1 class="text-4xl font-extrabold text-gray-800 text-center mb-2">Controle de Presença</h1>
+    <p class="text-lg text-gray-500 text-center mb-8">
+        Registre a presença e falta dos catequizandos.
+    </p>
 
-        <!-- Class selection and controls -->
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-                <label for="class-select" class="text-gray-700 font-semibold">Turma:</label>
-                <select id="class-select" class="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"></select>
-                <button id="add-class-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md w-full sm:w-auto">
-                    Nova Turma
-                </button>
-            </div>
-            <div class="flex items-center gap-4 w-full sm:w-auto">
-                <label for="catechist-name-input" class="text-gray-700 font-semibold">Catequista:</label>
-                <input type="text" id="catechist-name-input" placeholder="Nome do Catequista" class="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
-            </div>
-        </div>
-        
-        <!-- Class edit and delete buttons -->
-        <div class="flex justify-center sm:justify-end gap-2 mb-8">
-            <button id="edit-class-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md">
-                Editar Turma
-            </button>
-            <button id="delete-class-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md">
-                Excluir Turma
-            </button>
-            <button id="access-class-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md">
-                Acessar Turma
+    <!-- Class selection and controls -->
+    <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+        <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <label for="class-select" class="text-gray-700 font-semibold">Turma:</label>
+            <select id="class-select" class="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"></select>
+            <button id="add-class-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md w-full sm:w-auto">
+                Nova Turma
             </button>
         </div>
+        <div class="flex items-center gap-4 w-full sm:w-auto">
+            <label for="catechist-name-input" class="text-gray-700 font-semibold">Catequista:</label>
+            <input type="text" id="catechist-name-input" placeholder="Nome do Catequista" class="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+        </div>
+    </div>
+    
+    <!-- Class edit and delete buttons -->
+    <div class="flex justify-center sm:justify-end gap-2 mb-8">
+        <button id="edit-class-btn" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md">
+            Editar Turma
+        </button>
+        <button id="delete-class-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md">
+            Excluir Turma
+        </button>
+        <button id="access-class-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md">
+            Acessar Turma
+        </button>
+    </div>
 
 
-        <!-- Class-specific controls -->
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-            <div class="flex items-center gap-4 w-full sm:w-auto">
-                <label for="attendance-date" class="text-gray-700 font-semibold">Data Catequese:</label>
-                <input type="date" id="attendance-date" class="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
-            </div>
-            <div class="flex items-center gap-4 w-full sm:w-auto">
-                <label for="mass-date" class="text-gray-700 font-semibold">Data Missa:</label>
-                <input type="date" id="mass-date" class="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
-            </div>
-            <div class="flex gap-2 w-full sm:w-auto">
-                <button id="add-student-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md flex-1">
-                    Adicionar Catequizando
+    <!-- Class-specific controls -->
+    <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+        <div class="flex items-center gap-4 w-full sm:w-auto">
+            <label for="attendance-date" class="text-gray-700 font-semibold">Data Catequese:</label>
+            <input type="date" id="attendance-date" class="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+        </div>
+        <div class="flex items-center gap-4 w-full sm:w-auto">
+            <label for="mass-date" class="text-gray-700 font-semibold">Data Missa:</label>
+            <input type="date" id="mass-date" class="border rounded-lg p-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+        </div>
+        <div class="flex gap-2 w-full sm:w-auto">
+            <button id="add-student-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md flex-1">
+                Adicionar Catequizando
+            </button>
+            <button id="import-students-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md flex-1">
+                Importar Catequizandos
+            </button>
+            <button id="show-report-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md flex-1">
+                Relatório Geral
+            </button>
+        </div>
+    </div>
+
+    <!-- General Report container (initially hidden) -->
+    <div id="general-report" class="hidden bg-gray-50 p-6 rounded-lg mb-8 shadow-inner border border-gray-200">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800 text-center">Relatório Geral</h2>
+        <div id="report-content" class="text-gray-700 text-lg">
+            <!-- Report data will be rendered here -->
+        </div>
+        <div class="mt-6 flex justify-end">
+            <button id="export-report-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md">
+                Exportar para CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Student list container -->
+    <div id="student-list" class="space-y-4">
+        <!-- Student items will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Add/Edit class modal -->
+    <div id="class-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full">
+            <h2 id="class-modal-title" class="text-2xl font-bold mb-4 text-gray-800"></h2>
+            <input type="text" id="class-name-input" placeholder="Nome da Turma" class="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex justify-end gap-2">
+                <button id="cancel-class-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
+                    Cancelar
                 </button>
-                <button id="import-students-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md flex-1">
-                    Importar Catequizandos
+                <button id="save-class-btn" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">
+                    Salvar
                 </button>
-                <button id="show-report-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md flex-1">
-                    Relatório Geral
-                </button>
-            </div>
-        </div>
-
-        <!-- General Report container (initially hidden) -->
-        <div id="general-report" class="hidden bg-gray-50 p-6 rounded-lg mb-8 shadow-inner border border-gray-200">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800 text-center">Relatório Geral</h2>
-            <div id="report-content" class="text-gray-700 text-lg">
-                <!-- Report data will be rendered here -->
-            </div>
-            <div class="mt-6 flex justify-end">
-                <button id="export-report-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 shadow-md">
-                    Exportar para CSV
-                </button>
-            </div>
-        </div>
-
-        <!-- Student list container -->
-        <div id="student-list" class="space-y-4">
-            <!-- Student items will be rendered here by JavaScript -->
-        </div>
-
-        <!-- Add/Edit class modal -->
-        <div id="class-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full">
-                <h2 id="class-modal-title" class="text-2xl font-bold mb-4 text-gray-800"></h2>
-                <input type="text" id="class-name-input" placeholder="Nome da Turma" class="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <div class="flex justify-end gap-2">
-                    <button id="cancel-class-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
-                        Cancelar
-                    </button>
-                    <button id="save-class-btn" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700">
-                        Salvar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Add student modal -->
-        <div id="add-student-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full">
-                <h2 class="text-2xl font-bold mb-4 text-gray-800">Novo Catequizando</h2>
-                <input type="text" id="new-student-name" placeholder="Nome Completo" class="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <div class="flex justify-end gap-2">
-                    <button id="cancel-add-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
-                        Cancelar
-                    </button>
-                    <button id="save-student-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">
-                        Salvar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Import students modal -->
-        <div id="import-students-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
-                <h2 class="text-2xl font-bold mb-4 text-gray-800">Importar Catequizandos</h2>
-                <p class="text-gray-600 mb-4">
-                    Cole uma lista de nomes abaixo. Insira um nome por linha.
-                </p>
-                <textarea id="import-student-list" class="w-full h-40 p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Exemplo:&#10;Ana Carolina Oliveira&#10;Pedro Henrique Santos&#10;Mariana Costa"></textarea>
-                <div class="flex justify-end gap-2">
-                    <button id="cancel-import-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
-                        Cancelar
-                    </button>
-                    <button id="save-imported-students-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">
-                        Importar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- History modal -->
-        <div id="history-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-                <h2 id="history-modal-title" class="text-2xl font-bold mb-4 text-gray-800">Histórico de Presença</h2>
-                <div id="history-list" class="max-h-96 overflow-y-auto space-y-2 mb-4">
-                    <!-- History items will be rendered here -->
-                </div>
-                <div class="flex justify-end">
-                    <button id="close-history-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
-                        Fechar
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Delete confirmation modal -->
-        <div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
-                <h2 class="text-xl font-bold mb-4 text-gray-800">Confirmar Exclusão</h2>
-                <p id="delete-modal-text" class="mb-4 text-gray-600"></p>
-                <div class="flex justify-center gap-4">
-                    <button id="cancel-delete-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
-                        Cancelar
-                    </button>
-                    <button id="confirm-delete-btn" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">
-                        Excluir
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript for application logic -->
-    <script>
-        const APP_PREFIX = 'attendance-tracker-app-';
-        const CLASSES_KEY = 'attendance-tracker-classes';
-        
-        // Enum-like object for attendance statuses
-        const STATUS = {
-            UNKNOWN: 'unknown',
-            PRESENTE: 'presente',
-            FALTA: 'falta',
-            FALTA_JUSTIFICADA: 'falta_justificada',
-            FALTA_REPOSTA: 'falta_reposta'
-        };
+    <!-- Add student modal -->
+    <div id="add-student-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Novo Catequizando</h2>
+            <input type="text" id="new-student-name" placeholder="Nome Completo" class="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex justify-end gap-2">
+                <button id="cancel-add-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
+                    Cancelar
+                </button>
+                <button id="save-student-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">
+                    Salvar
+                </button>
+            </div>
+        </div>
+    </div>
 
-        const STATUS_LABELS = {
-            [STATUS.UNKNOWN]: 'Não Marcado',
-            [STATUS.PRESENTE]: 'Presença',
-            [STATUS.FALTA]: 'Falta',
-            [STATUS.FALTA_JUSTIFICADA]: 'Falta Justificada',
-            [STATUS.FALTA_REPOSTA]: 'Falta Reposta'
-        };
+    <!-- Import students modal -->
+    <div id="import-students-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Importar Catequizandos</h2>
+            <p class="text-gray-600 mb-4">
+                Cole uma lista de nomes abaixo. Insira um nome por linha.
+            </p>
+            <textarea id="import-student-list" class="w-full h-40 p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-gray-500" placeholder="Exemplo:&#10;Ana Carolina Oliveira&#10;Pedro Henrique Santos&#10;Mariana Costa"></textarea>
+            <div class="flex justify-end gap-2">
+                <button id="cancel-import-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
+                    Cancelar
+                </button>
+                <button id="save-imported-students-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">
+                    Importar
+                </button>
+            </div>
+        </div>
+    </div>
 
-        // Get DOM elements
-        const studentListEl = document.getElementById('student-list');
-        const attendanceDateEl = document.getElementById('attendance-date');
-        const massDateEl = document.getElementById('mass-date');
-        const addStudentBtn = document.getElementById('add-student-btn');
-        const importStudentsBtn = document.getElementById('import-students-btn');
-        const showReportBtn = document.getElementById('show-report-btn');
-        const generalReportEl = document.getElementById('general-report');
-        const reportContentEl = document.getElementById('report-content');
-        const classSelectEl = document.getElementById('class-select');
-        const addClassBtn = document.getElementById('add-class-btn');
-        const editClassBtn = document.getElementById('edit-class-btn');
-        const deleteClassBtn = document.getElementById('delete-class-btn');
-        const accessClassBtn = document.getElementById('access-class-btn');
-        const exportReportBtn = document.getElementById('export-report-btn');
-        const catechistNameInput = document.getElementById('catechist-name-input');
+    <!-- History modal -->
+    <div id="history-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
+            <h2 id="history-modal-title" class="text-2xl font-bold mb-4 text-gray-800">Histórico de Presença</h2>
+            <div id="history-list" class="max-h-96 overflow-y-auto space-y-2 mb-4">
+                <!-- History items will be rendered here -->
+            </div>
+            <div class="flex justify-end">
+                <button id="close-history-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
 
-        // Modals and their elements
-        const classModal = document.getElementById('class-modal');
-        const classModalTitle = document.getElementById('class-modal-title');
-        const classNameInput = document.getElementById('class-name-input');
-        const saveClassBtn = document.getElementById('save-class-btn');
-        const cancelClassBtn = document.getElementById('cancel-class-btn');
+    <!-- Delete confirmation modal -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Confirmar Exclusão</h2>
+            <p id="delete-modal-text" class="mb-4 text-gray-600"></p>
+            <div class="flex justify-center gap-4">
+                <button id="cancel-delete-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">
+                    Cancelar
+                </button>
+                <button id="confirm-delete-btn" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        const addStudentModal = document.getElementById('add-student-modal');
-        const newStudentNameInput = document.getElementById('new-student-name');
-        const saveStudentBtn = document.getElementById('save-student-btn');
-        const cancelAddBtn = document.getElementById('cancel-add-btn');
-        
-        const importStudentsModal = document.getElementById('import-students-modal');
-        const importStudentListTextarea = document.getElementById('import-student-list');
-        const saveImportedStudentsBtn = document.getElementById('save-imported-students-btn');
-        const cancelImportBtn = document.getElementById('cancel-import-btn');
+<!-- JavaScript for application logic -->
+<script>
+    const APP_PREFIX = 'attendance-tracker-app-';
+    const CLASSES_KEY = 'attendance-tracker-classes';
+    
+    // Enum-like object for attendance statuses
+    const STATUS = {
+        UNKNOWN: 'unknown',
+        PRESENTE: 'presente',
+        FALTA: 'falta',
+        FALTA_JUSTIFICADA: 'falta_justificada',
+        FALTA_REPOSTA: 'falta_reposta'
+    };
 
-        const historyModal = document.getElementById('history-modal');
-        const historyModalTitle = document.getElementById('history-modal-title');
-        const historyListEl = document.getElementById('history-list');
-        const closeHistoryBtn = document.getElementById('close-history-btn');
+    const STATUS_LABELS = {
+        [STATUS.UNKNOWN]: 'Não Marcado',
+        [STATUS.PRESENTE]: 'Presença',
+        [STATUS.FALTA]: 'Falta',
+        [STATUS.FALTA_JUSTIFICADA]: 'Falta Justificada',
+        [STATUS.FALTA_REPOSTA]: 'Falta Reposta'
+    };
 
-        const deleteModal = document.getElementById('delete-modal');
-        const deleteModalText = document.getElementById('delete-modal-text');
-        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    // Get DOM elements
+    const studentListEl = document.getElementById('student-list');
+    const attendanceDateEl = document.getElementById('attendance-date');
+    const massDateEl = document.getElementById('mass-date');
+    const addStudentBtn = document.getElementById('add-student-btn');
+    const importStudentsBtn = document.getElementById('import-students-btn');
+    const showReportBtn = document.getElementById('show-report-btn');
+    const generalReportEl = document.getElementById('general-report');
+    const reportContentEl = document.getElementById('report-content');
+    const classSelectEl = document.getElementById('class-select');
+    const addClassBtn = document.getElementById('add-class-btn');
+    const editClassBtn = document.getElementById('edit-class-btn');
+    const deleteClassBtn = document.getElementById('delete-class-btn');
+    const accessClassBtn = document.getElementById('access-class-btn');
+    const exportReportBtn = document.getElementById('export-report-btn');
+    const catechistNameInput = document.getElementById('catechist-name-input');
 
-        let students = [];
-        let classes = [];
-        let currentClassId = null;
-        let selectedDate = new Date().toISOString().split('T')[0];
-        let selectedMassDate = new Date().toISOString().split('T')[0];
-        let studentToDelete = null;
+    // Modals and their elements
+    const classModal = document.getElementById('class-modal');
+    const classModalTitle = document.getElementById('class-modal-title');
+    const classNameInput = document.getElementById('class-name-input');
+    const saveClassBtn = document.getElementById('save-class-btn');
+    const cancelClassBtn = document.getElementById('cancel-class-btn');
 
-        /**
-         * Migrates old data format to the new format.
-         * The old format had a boolean value for attendance. The new one is a string.
-         */
-        function migrateData(data) {
-            return data.map(student => {
-                const newAttendance = {};
-                for (const date in student.attendance) {
-                    // Check if the old attendance is a boolean
-                    if (typeof student.attendance[date] === 'boolean') {
-                        newAttendance[date] = {
-                            catequese: student.attendance[date] ? STATUS.PRESENTE : STATUS.FALTA,
-                            missa: STATUS.UNKNOWN
-                        };
-                    } else {
-                        // Data is already in the new format, just copy it
-                        newAttendance[date] = student.attendance[date];
-                    }
-                }
-                return { ...student, attendance: newAttendance };
-            });
-        }
+    const addStudentModal = document.getElementById('add-student-modal');
+    const newStudentNameInput = document.getElementById('new-student-name');
+    const saveStudentBtn = document.getElementById('save-student-btn');
+    const cancelAddBtn = document.getElementById('cancel-add-btn');
+    
+    const importStudentsModal = document.getElementById('import-students-modal');
+    const importStudentListTextarea = document.getElementById('import-student-list');
+    const saveImportedStudentsBtn = document.getElementById('save-imported-students-btn');
+    const cancelImportBtn = document.getElementById('cancel-import-btn');
 
-        /**
-         * Loads all classes from local storage.
-         */
-        function loadClasses() {
-            try {
-                const storedClasses = localStorage.getItem(CLASSES_KEY);
-                if (storedClasses) {
-                    classes = JSON.parse(storedClasses);
+    const historyModal = document.getElementById('history-modal');
+    const historyModalTitle = document.getElementById('history-modal-title');
+    const historyListEl = document.getElementById('history-list');
+    const closeHistoryBtn = document.getElementById('close-history-btn');
+
+    const deleteModal = document.getElementById('delete-modal');
+    const deleteModalText = document.getElementById('delete-modal-text');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+    let students = [];
+    let classes = [];
+    let currentClassId = null;
+    let selectedDate = new Date().toISOString().split('T')[0];
+    let selectedMassDate = new Date().toISOString().split('T')[0];
+    let studentToDelete = null;
+
+    /**
+     * Migrates old data format to the new format.
+     * The old format had a boolean value for attendance. The new one is a string.
+     */
+    function migrateData(data) {
+        return data.map(student => {
+            const newAttendance = {};
+            for (const date in student.attendance) {
+                // Check if the old attendance is a boolean
+                if (typeof student.attendance[date] === 'boolean') {
+                    newAttendance[date] = {
+                        catequese: student.attendance[date] ? STATUS.PRESENTE : STATUS.FALTA,
+                        missa: STATUS.UNKNOWN
+                    };
                 } else {
-                    classes = [{ id: 1, name: "Turma Padrão", catechist: "" }];
-                    saveClasses();
+                    // Data is already in the new format, just copy it
+                    newAttendance[date] = student.attendance[date];
                 }
-            } catch (error) {
-                console.error("Failed to load classes from local storage:", error);
             }
-        }
+            return { ...student, attendance: newAttendance };
+        });
+    }
 
-        /**
-         * Saves all classes to local storage.
-         */
-        function saveClasses() {
-            try {
-                localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
-            } catch (error) {
-                console.error("Failed to save classes to local storage:", error);
-            }
-        }
-
-        /**
-         * Renders the list of classes in the select dropdown.
-         */
-        function renderClasses() {
-            classSelectEl.innerHTML = '';
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.name;
-                classSelectEl.appendChild(option);
-            });
-            if (currentClassId) {
-                classSelectEl.value = currentClassId;
-            }
-        }
-
-        /**
-         * Sets the current class and loads its students.
-         * @param {number} classId - The ID of the class to select.
-         */
-        function selectClass(classId) {
-            currentClassId = classId;
-            loadStudents();
-            renderStudents();
-            
-            const currentClass = classes.find(c => c.id === currentClassId);
-            catechistNameInput.value = currentClass ? currentClass.catechist : "";
-        }
-
-        /**
-         * Loads students data for the current class from local storage.
-         */
-        function loadStudents() {
-            try {
-                const storedData = localStorage.getItem(APP_PREFIX + currentClassId);
-                if (storedData) {
-                    const loadedData = JSON.parse(storedData);
-                    if (loadedData.some(s => Object.values(s.attendance).some(val => typeof val === 'boolean'))) {
-                        students = migrateData(loadedData);
-                        saveStudents();
-                    } else {
-                        students = loadedData;
-                    }
-                } else {
-                    students = [
-                        { id: 1, name: "Ana Maria Santos", attendance: {} },
-                        { id: 2, name: "João Pedro Costa", attendance: {} }
-                    ];
-                    saveStudents();
-                }
-            } catch (error) {
-                console.error("Failed to load students for class:", error);
-                students = [];
-            }
-        }
-
-        /**
-         * Saves the current students array to local storage for the current class.
-         */
-        function saveStudents() {
-            try {
-                localStorage.setItem(APP_PREFIX + currentClassId, JSON.stringify(students));
-            } catch (error) {
-                console.error("Failed to save students to local storage:", error);
-            }
-        }
-
-        /**
-         * Renders the list of students on the page.
-         */
-        function renderStudents() {
-            studentListEl.innerHTML = '';
-            if (students.length === 0) {
-                 studentListEl.innerHTML = `<p class="text-center text-gray-500 text-lg">Nenhum catequizando adicionado ainda.</p>`;
-                 return;
-            }
-            students.forEach(student => {
-                const studentItem = document.createElement('div');
-                studentItem.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white rounded-lg p-4 shadow-sm gap-4";
-
-                const attendance = student.attendance[selectedDate] || { catequese: STATUS.UNKNOWN, missa: STATUS.UNKNOWN };
-                const massAttendance = (student.attendance[selectedMassDate] && student.attendance[selectedMassDate].missa) ? student.attendance[selectedMassDate].missa : STATUS.UNKNOWN;
-                
-                studentItem.innerHTML = `
-                    <div class="flex-1 min-w-0">
-                        <span class="text-xl font-bold text-gray-800">${student.name}</span>
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                            <span class="text-gray-600 font-semibold text-sm">Catequese:</span>
-                            <button class="status-btn status-${attendance.catequese}" data-id="${student.id}" data-type="catequese" data-date="${selectedDate}">
-                                ${STATUS_LABELS[attendance.catequese]}
-                            </button>
-                        </div>
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                            <span class="text-gray-600 font-semibold text-sm">Missa:</span>
-                            <button class="status-btn status-${massAttendance}" data-id="${student.id}" data-type="missa" data-date="${selectedMassDate}">
-                                ${STATUS_LABELS[massAttendance]}
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="flex gap-2 sm:self-center">
-                        <button class="bg-gray-300 text-gray-700 hover:bg-gray-400 font-bold py-2 px-3 rounded-lg flex items-center justify-center transition-colors duration-300 text-sm" data-action="history" data-id="${student.id}">
-                            <i class="fas fa-history"></i>
-                        </button>
-                        <button class="bg-red-500 text-white hover:bg-red-600 font-bold py-2 px-3 rounded-lg flex items-center justify-center transition-colors duration-300 text-sm" data-action="delete" data-id="${student.id}">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                `;
-                studentListEl.appendChild(studentItem);
-            });
-        }
-
-        /**
-         * Adds a single new student to the students array.
-         * @param {string} name - The name of the new student.
-         */
-        function addStudent(name) {
-            if (name.trim() === '') {
-                showToast("Por favor, digite um nome.", "bg-yellow-500");
-                return;
-            }
-            const newId = students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1;
-            students.push({ id: newId, name: name.trim(), attendance: {} });
-            saveStudents();
-            renderStudents();
-            showToast("Catequizando adicionado com sucesso!", "bg-green-500");
-        }
-
-        /**
-         * Adds multiple students from a list of names.
-         * @param {string} namesString - A string containing names, separated by newlines.
-         */
-        function importStudents(namesString) {
-            const names = namesString.split('\n').filter(name => name.trim() !== '');
-            if (names.length === 0) {
-                showToast("Nenhum nome foi importado. Por favor, insira um nome por linha.", "bg-yellow-500");
-                return;
-            }
-
-            let lastId = students.length > 0 ? Math.max(...students.map(s => s.id)) : 0;
-            const newStudents = names.map(name => {
-                lastId++;
-                return { id: lastId, name: name.trim(), attendance: {} };
-            });
-
-            students = students.concat(newStudents);
-            saveStudents();
-            renderStudents();
-            showToast(`${newStudents.length} catequizandos importados com sucesso!`, "bg-green-500");
-        }
-
-        /**
-         * Deletes a student from the students array.
-         * @param {number} studentId - The ID of the student to delete.
-         */
-        function deleteStudent(studentId) {
-            const index = students.findIndex(s => s.id === studentId);
-            if (index > -1) {
-                students.splice(index, 1);
-                saveStudents();
-                renderStudents();
-                showToast("Catequizando excluído com sucesso.", "bg-red-500");
-            }
-        }
-        
-        /**
-         * Toggles the attendance status for a student on the selected date.
-         * @param {number} studentId - The ID of the student.
-         * @param {string} type - 'catequese' or 'missa'.
-         * @param {string} date - The date string for the record.
-         */
-        function toggleAttendance(studentId, type, date) {
-            const student = students.find(s => s.id === studentId);
-            if (!student) return;
-
-            // Initialize the attendance object for the date if it doesn't exist
-            if (!student.attendance[date]) {
-                student.attendance[date] = { catequese: STATUS.UNKNOWN, missa: STATUS.UNKNOWN };
-            }
-            
-            const currentStatus = student.attendance[date][type];
-            let newStatus;
-            
-            // Cycle through statuses
-            switch (currentStatus) {
-                case STATUS.UNKNOWN:
-                    newStatus = STATUS.PRESENTE;
-                    break;
-                case STATUS.PRESENTE:
-                    newStatus = STATUS.FALTA;
-                    break;
-                case STATUS.FALTA:
-                    newStatus = STATUS.FALTA_JUSTIFICADA;
-                    break;
-                case STATUS.FALTA_JUSTIFICADA:
-                    newStatus = STATUS.FALTA_REPOSTA;
-                    break;
-                case STATUS.FALTA_REPOSTA:
-                    newStatus = STATUS.UNKNOWN;
-                    break;
-                default:
-                    newStatus = STATUS.UNKNOWN;
-            }
-            
-            student.attendance[date][type] = newStatus;
-            saveStudents();
-            renderStudents();
-        }
-
-        /**
-         * Displays the attendance history for a specific student in a modal.
-         * @param {number} studentId - The ID of the student.
-         */
-        function showHistory(studentId) {
-            const student = students.find(s => s.id === studentId);
-            if (!student) return;
-
-            historyModalTitle.textContent = `Histórico de Presença de ${student.name}`;
-            historyListEl.innerHTML = '';
-            const dates = Object.keys(student.attendance).sort();
-
-            if (dates.length === 0) {
-                historyListEl.innerHTML = `<p class="text-center text-gray-500 mt-4">Nenhum registro de presença encontrado.</p>`;
+    /**
+     * Loads all classes from local storage.
+     */
+    function loadClasses() {
+        try {
+            const storedClasses = localStorage.getItem(CLASSES_KEY);
+            if (storedClasses) {
+                classes = JSON.parse(storedClasses);
             } else {
-                dates.forEach(date => {
-                    const dailyRecord = student.attendance[date];
-                    if (dailyRecord) {
-                        const statusCatequese = dailyRecord.catequese;
-                        const statusMissa = dailyRecord.missa;
-                        const formattedDate = new Date(date + 'T12:00:00Z').toLocaleDateString('pt-BR');
-
-                        historyListEl.innerHTML += `
-                            <div class="flex flex-col p-2 rounded-lg bg-gray-100">
-                                <span class="font-bold text-gray-700 mb-1">${formattedDate}</span>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-gray-600">Catequese:</span>
-                                    <span class="font-semibold text-${STATUS_LABELS[statusCatequese].toLowerCase().replace(/\s/g, '_')}">${STATUS_LABELS[statusCatequese]}</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-gray-600">Missa:</span>
-                                    <span class="font-semibold text-${STATUS_LABELS[statusMissa].toLowerCase().replace(/\s/g, '_')}">${STATUS_LABELS[statusMissa]}</span>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-            }
-
-            historyModal.classList.remove('hidden');
-        }
-
-        /**
-         * Generates and displays a general attendance report.
-         */
-        function generateReport() {
-            if (students.length === 0) {
-                reportContentEl.innerHTML = `<p class="text-center text-gray-500">Nenhum catequizando para gerar relatório.</p>`;
-                return;
-            }
-            
-            const studentStats = students.map(student => {
-                const stats = {
-                    catequese: {
-                        [STATUS.PRESENTE]: 0,
-                        [STATUS.FALTA]: 0,
-                        [STATUS.FALTA_JUSTIFICADA]: 0,
-                        [STATUS.FALTA_REPOSTA]: 0
-                    },
-                    missa: {
-                        [STATUS.PRESENTE]: 0,
-                        [STATUS.FALTA]: 0,
-                        [STATUS.FALTA_JUSTIFICADA]: 0,
-                        [STATUS.FALTA_REPOSTA]: 0
-                    }
-                };
-
-                for (const date in student.attendance) {
-                    const dailyAttendance = student.attendance[date];
-                    if (dailyAttendance && dailyAttendance.catequese in stats.catequese) {
-                        stats.catequese[dailyAttendance.catequese]++;
-                    }
-                    if (dailyAttendance && dailyAttendance.missa in stats.missa) {
-                        stats.missa[dailyAttendance.missa]++;
-                    }
-                }
-                
-                return { name: student.name, stats };
-            });
-
-            let reportHtml = `<div class="space-y-6">`;
-            studentStats.forEach(student => {
-                reportHtml += `
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">${student.name}</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="space-y-1">
-                                <span class="text-lg font-semibold text-gray-700">Catequese</span>
-                                <ul class="text-sm text-gray-600 space-y-1">
-                                    <li><span class="font-bold text-green-600">Presenças:</span> ${student.stats.catequese[STATUS.PRESENTE]}</li>
-                                    <li><span class="font-bold text-red-600">Faltas:</span> ${student.stats.catequese[STATUS.FALTA]}</li>
-                                    <li><span class="font-bold text-orange-600">Faltas Justificadas:</span> ${student.stats.catequese[STATUS.FALTA_JUSTIFICADA]}</li>
-                                    <li><span class="font-bold text-blue-600">Faltas Repostas:</span> ${student.stats.catequese[STATUS.FALTA_REPOSTA]}</li>
-                                </ul>
-                            </div>
-                            <div class="space-y-1">
-                                <span class="text-lg font-semibold text-gray-700">Missa</span>
-                                <ul class="text-sm text-gray-600 space-y-1">
-                                    <li><span class="font-bold text-green-600">Presenças:</span> ${student.stats.missa[STATUS.PRESENTE]}</li>
-                                    <li><span class="font-bold text-red-600">Faltas:</span> ${student.stats.missa[STATUS.FALTA]}</li>
-                                    <li><span class="font-bold text-orange-600">Faltas Justificadas:</span> ${student.stats.missa[STATUS.FALTA_JUSTIFICADA]}</li>
-                                    <li><span class="font-bold text-blue-600">Faltas Repostas:</span> ${student.stats.missa[STATUS.FALTA_REPOSTA]}</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            reportHtml += `</div>`;
-            reportContentEl.innerHTML = reportHtml;
-            generalReportEl.classList.remove('hidden');
-        }
-
-        /**
-         * Exports the general report to a CSV file.
-         */
-        function exportReportToCSV() {
-            if (students.length === 0) {
-                showToast("Nenhum catequizando para exportar.", "bg-yellow-500");
-                return;
-            }
-
-            const header = ["Nome", "Presença Catequese", "Falta Catequese", "Falta Justificada Catequese", "Falta Reposta Catequese", "Presença Missa", "Falta Missa", "Falta Justificada Missa", "Falta Reposta Missa"];
-            const csvRows = [header.join(";")]; // Use semicolon for CSV to handle names with commas
-
-            students.forEach(student => {
-                const stats = {
-                    catequese: {
-                        [STATUS.PRESENTE]: 0,
-                        [STATUS.FALTA]: 0,
-                        [STATUS.FALTA_JUSTIFICADA]: 0,
-                        [STATUS.FALTA_REPOSTA]: 0
-                    },
-                    missa: {
-                        [STATUS.PRESENTE]: 0,
-                        [STATUS.FALTA]: 0,
-                        [STATUS.FALTA_JUSTIFICADA]: 0,
-                        [STATUS.FALTA_REPOSTA]: 0
-                    }
-                };
-                for (const date in student.attendance) {
-                    const dailyAttendance = student.attendance[date];
-                    if (dailyAttendance && dailyAttendance.catequese in stats.catequese) {
-                        stats.catequese[dailyAttendance.catequese]++;
-                    }
-                    if (dailyAttendance && dailyAttendance.missa in stats.missa) {
-                        stats.missa[dailyAttendance.missa]++;
-                    }
-                }
-
-                const row = [
-                    `"${student.name.replace(/"/g, '""')}"`,
-                    stats.catequese[STATUS.PRESENTE],
-                    stats.catequese[STATUS.FALTA],
-                    stats.catequese[STATUS.FALTA_JUSTIFICADA],
-                    stats.catequese[STATUS.FALTA_REPOSTA],
-                    stats.missa[STATUS.PRESENTE],
-                    stats.missa[STATUS.FALTA],
-                    stats.missa[STATUS.FALTA_JUSTIFICADA],
-                    stats.missa[STATUS.FALTA_REPOSTA]
-                ];
-                csvRows.push(row.join(";"));
-            });
-
-            const csvString = csvRows.join("\n");
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute("href", url);
-            link.setAttribute("download", `relatorio_presenca_turma.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("Relatório exportado com sucesso!", "bg-green-500");
-        }
-
-        /**
-         * Displays a toast notification.
-         * @param {string} message - The message to display.
-         * @param {string} bgColor - The background color class (e.g., 'bg-green-500').
-         */
-        function showToast(message, bgColor) {
-            const toastEl = document.createElement('div');
-            toastEl.className = `${bgColor} text-white px-4 py-2 rounded-lg fixed bottom-4 right-4 shadow-lg transition-transform transform translate-y-full animate-slide-in-up z-50`;
-            toastEl.textContent = message;
-            document.body.appendChild(toastEl);
-            setTimeout(() => {
-                toastEl.classList.add('opacity-0', 'transition-opacity', 'duration-500');
-                setTimeout(() => toastEl.remove(), 500);
-            }, 3000);
-        }
-
-        // Event Listeners
-        window.addEventListener('load', () => {
-            attendanceDateEl.value = new Date().toISOString().split('T')[0];
-            massDateEl.value = new Date().toISOString().split('T')[0];
-            loadClasses();
-            renderClasses();
-            currentClassId = classes.length > 0 ? classes[0].id : null;
-            if (currentClassId) {
-                selectClass(currentClassId);
-            }
-        });
-
-        classSelectEl.addEventListener('change', (e) => {
-            selectClass(parseInt(e.target.value));
-        });
-        
-        catechistNameInput.addEventListener('input', (e) => {
-            const currentClass = classes.find(c => c.id === currentClassId);
-            if (currentClass) {
-                currentClass.catechist = e.target.value;
+                classes = [{ id: 1, name: "Turma Padrão", catechist: "" }];
                 saveClasses();
             }
+        } catch (error) {
+            console.error("Failed to load classes from local storage:", error);
+        }
+    }
+
+    /**
+     * Saves all classes to local storage.
+     */
+    function saveClasses() {
+        try {
+            localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
+        } catch (error) {
+            console.error("Failed to save classes to local storage:", error);
+        }
+    }
+
+    /**
+     * Renders the list of classes in the select dropdown.
+     */
+    function renderClasses() {
+        classSelectEl.innerHTML = '';
+        classes.forEach(cls => {
+            const option = document.createElement('option');
+            option.value = cls.id;
+            option.textContent = cls.name;
+            classSelectEl.appendChild(option);
         });
+        if (currentClassId) {
+            classSelectEl.value = currentClassId;
+        }
+    }
 
-        attendanceDateEl.addEventListener('change', (e) => {
-            selectedDate = e.target.value;
-            renderStudents();
-        });
-
-        massDateEl.addEventListener('change', (e) => {
-            selectedMassDate = e.target.value;
-            renderStudents();
-        });
-
-        studentListEl.addEventListener('click', (e) => {
-            const target = e.target.closest('button');
-            if (!target) return;
-
-            const studentId = parseInt(target.dataset.id);
-            const action = target.dataset.action;
-            const type = target.dataset.type;
-            const date = target.dataset.date;
-
-            if (target.classList.contains('status-btn')) {
-                toggleAttendance(studentId, type, date);
-            } else if (action === 'history') {
-                showHistory(studentId);
-            } else if (action === 'delete') {
-                const student = students.find(s => s.id === studentId);
-                if (student) {
-                    studentToDelete = studentId;
-                    deleteModalText.textContent = `Tem certeza que deseja excluir o catequizando ${student.name}?`;
-                    deleteModal.classList.remove('hidden');
-                    deleteModal.dataset.mode = 'student';
-                }
-            }
-        });
-
-        // Class Modal Logic
-        addClassBtn.addEventListener('click', () => {
-            classModalTitle.textContent = "Nova Turma";
-            classNameInput.value = '';
-            classNameInput.dataset.mode = 'add';
-            classModal.classList.remove('hidden');
-        });
-
-        editClassBtn.addEventListener('click', () => {
-            const currentClass = classes.find(c => c.id === currentClassId);
-            if (!currentClass) {
-                showToast("Nenhuma turma selecionada para editar.", "bg-yellow-500");
-                return;
-            }
-            classModalTitle.textContent = "Editar Turma";
-            classNameInput.value = currentClass.name;
-            classNameInput.dataset.mode = 'edit';
-            classModal.classList.remove('hidden');
-        });
-
-        cancelClassBtn.addEventListener('click', () => {
-            classModal.classList.add('hidden');
-        });
+    /**
+     * Sets the current class and loads its students.
+     * @param {number} classId - The ID of the class to select.
+     */
+    function selectClass(classId) {
+        currentClassId = classId;
+        loadStudents();
+        renderStudents();
         
-        saveClassBtn.addEventListener('click', () => {
-            const name = classNameInput.value.trim();
-            if (!name) {
-                showToast("Por favor, digite um nome para a turma.", "bg-yellow-500");
-                return;
+        const currentClass = classes.find(c => c.id === currentClassId);
+        catechistNameInput.value = currentClass ? currentClass.catechist : "";
+    }
+
+    /**
+     * Loads students data for the current class from local storage.
+     */
+    function loadStudents() {
+        try {
+            const storedData = localStorage.getItem(APP_PREFIX + currentClassId);
+            if (storedData) {
+                const loadedData = JSON.parse(storedData);
+                if (loadedData.some(s => Object.values(s.attendance).some(val => typeof val === 'boolean'))) {
+                    students = migrateData(loadedData);
+                    saveStudents();
+                } else {
+                    students = loadedData;
+                }
+            } else {
+                students = [
+                    { id: 1, name: "Ana Maria Santos", attendance: {} },
+                    { id: 2, name: "João Pedro Costa", attendance: {} }
+                ];
+                saveStudents();
             }
-            const mode = classNameInput.dataset.mode;
+        } catch (error) {
+            console.error("Failed to load students for class:", error);
+            students = [];
+        }
+    }
+
+    /**
+     * Saves the current students array to local storage for the current class.
+     */
+    function saveStudents() {
+        try {
+            localStorage.setItem(APP_PREFIX + currentClassId, JSON.stringify(students));
+        } catch (error) {
+            console.error("Failed to save students to local storage:", error);
+        }
+    }
+
+    /**
+     * Renders the list of students on the page.
+     */
+    function renderStudents() {
+        studentListEl.innerHTML = '';
+        if (students.length === 0) {
+             studentListEl.innerHTML = `<p class="text-center text-gray-500 text-lg">Nenhum catequizando adicionado ainda.</p>`;
+             return;
+        }
+        students.forEach(student => {
+            const studentItem = document.createElement('div');
+            studentItem.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white rounded-lg p-4 shadow-sm gap-4";
+
+            const attendance = student.attendance[selectedDate] || { catequese: STATUS.UNKNOWN, missa: STATUS.UNKNOWN };
+            const massAttendance = (student.attendance[selectedMassDate] && student.attendance[selectedMassDate].missa) ? student.attendance[selectedMassDate].missa : STATUS.UNKNOWN;
             
-            if (mode === 'add') {
-                const newId = classes.length > 0 ? Math.max(...classes.map(c => c.id)) + 1 : 1;
-                classes.push({ id: newId, name: name, catechist: "" });
-                selectClass(newId);
-                showToast("Turma adicionada com sucesso!", "bg-green-500");
-            } else if (mode === 'edit') {
-                const currentClass = classes.find(c => c.id === currentClassId);
-                if (currentClass) {
-                    currentClass.name = name;
-                    showToast("Turma editada com sucesso!", "bg-green-500");
-                }
-            }
-            saveClasses();
-            renderClasses();
-            classModal.classList.add('hidden');
+            studentItem.innerHTML = `
+                <div class="flex-1 min-w-0">
+                    <span class="text-xl font-bold text-gray-800">${student.name}</span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <span class="text-gray-600 font-semibold text-sm">Catequese:</span>
+                        <button class="status-btn status-${attendance.catequese}" data-id="${student.id}" data-type="catequese" data-date="${selectedDate}">
+                            ${STATUS_LABELS[attendance.catequese]}
+                        </button>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                        <span class="text-gray-600 font-semibold text-sm">Missa:</span>
+                        <button class="status-btn status-${massAttendance}" data-id="${student.id}" data-type="missa" data-date="${selectedMassDate}">
+                            ${STATUS_LABELS[massAttendance]}
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2 sm:self-center">
+                    <button class="bg-gray-300 text-gray-700 hover:bg-gray-400 font-bold py-2 px-3 rounded-lg flex items-center justify-center transition-colors duration-300 text-sm" data-action="history" data-id="${student.id}">
+                        <i class="fas fa-history"></i>
+                    </button>
+                    <button class="bg-red-500 text-white hover:bg-red-600 font-bold py-2 px-3 rounded-lg flex items-center justify-center transition-colors duration-300 text-sm" data-action="delete" data-id="${student.id}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+            studentListEl.appendChild(studentItem);
         });
+    }
+
+    /**
+     * Adds a single new student to the students array.
+     * @param {string} name - The name of the new student.
+     */
+    function addStudent(name) {
+        if (name.trim() === '') {
+            showToast("Por favor, digite um nome.", "bg-yellow-500");
+            return;
+        }
+        const newId = students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1;
+        students.push({ id: newId, name: name.trim(), attendance: {} });
+        saveStudents();
+        renderStudents();
+        showToast("Catequizando adicionado com sucesso!", "bg-green-500");
+    }
+
+    /**
+     * Adds multiple students from a list of names.
+     * @param {string} namesString - A string containing names, separated by newlines.
+     */
+    function importStudents(namesString) {
+        const names = namesString.split('\n').filter(name => name.trim() !== '');
+        if (names.length === 0) {
+            showToast("Nenhum nome foi importado. Por favor, insira um nome por linha.", "bg-yellow-500");
+            return;
+        }
+
+        let lastId = students.length > 0 ? Math.max(...students.map(s => s.id)) : 0;
+        const newStudents = names.map(name => {
+            lastId++;
+            return { id: lastId, name: name.trim(), attendance: {} };
+        });
+
+        students = students.concat(newStudents);
+        saveStudents();
+        renderStudents();
+        showToast(`${newStudents.length} catequizandos importados com sucesso!`, "bg-green-500");
+    }
+
+    /**
+     * Deletes a student from the students array.
+     * @param {number} studentId - The ID of the student to delete.
+     */
+    function deleteStudent(studentId) {
+        const index = students.findIndex(s => s.id === studentId);
+        if (index > -1) {
+            students.splice(index, 1);
+            saveStudents();
+            renderStudents();
+            showToast("Catequizando excluído com sucesso.", "bg-red-500");
+        }
+    }
+    
+    /**
+     * Toggles the attendance status for a student on the selected date.
+     * @param {number} studentId - The ID of the student.
+     * @param {string} type - 'catequese' or 'missa'.
+     * @param {string} date - The date string for the record.
+     */
+    function toggleAttendance(studentId, type, date) {
+        const student = students.find(s => s.id === studentId);
+        if (!student) return;
+
+        // Initialize the attendance object for the date if it doesn't exist
+        if (!student.attendance[date]) {
+            student.attendance[date] = { catequese: STATUS.UNKNOWN, missa: STATUS.UNKNOWN };
+        }
         
-        deleteClassBtn.addEventListener('click', () => {
-            if (classes.length <= 1) {
-                showToast("Não é possível excluir a última turma.", "bg-yellow-500");
-                return;
-            }
-            const currentClass = classes.find(c => c.id === currentClassId);
-            deleteModalText.textContent = `Tem certeza que deseja excluir a turma "${currentClass.name}"? Esta ação não pode ser desfeita.`;
-            deleteModal.classList.remove('hidden');
-            deleteModal.dataset.mode = 'class';
-        });
+        const currentStatus = student.attendance[date][type];
+        let newStatus;
+        
+        // Cycle through statuses
+        switch (currentStatus) {
+            case STATUS.UNKNOWN:
+                newStatus = STATUS.PRESENTE;
+                break;
+            case STATUS.PRESENTE:
+                newStatus = STATUS.FALTA;
+                break;
+            case STATUS.FALTA:
+                newStatus = STATUS.FALTA_JUSTIFICADA;
+                break;
+            case STATUS.FALTA_JUSTIFICADA:
+                newStatus = STATUS.FALTA_REPOSTA;
+                break;
+            case STATUS.FALTA_REPOSTA:
+                newStatus = STATUS.UNKNOWN;
+                break;
+            default:
+                newStatus = STATUS.UNKNOWN;
+        }
+        
+        student.attendance[date][type] = newStatus;
+        saveStudents();
+        renderStudents();
+    }
 
-        // Student & Class delete confirmation logic
-        confirmDeleteBtn.addEventListener('click', () => {
-            const mode = deleteModal.dataset.mode;
-            if (mode === 'class') {
-                // Delete class
-                const index = classes.findIndex(c => c.id === currentClassId);
-                if (index > -1) {
-                    localStorage.removeItem(APP_PREFIX + currentClassId);
-                    classes.splice(index, 1);
-                    saveClasses();
-                    const newClassId = classes.length > 0 ? classes[0].id : null;
-                    currentClassId = newClassId;
-                    renderClasses();
-                    if (newClassId) {
-                        selectClass(newClassId);
-                    } else {
-                        // Create a new default class if all are deleted
-                        classes = [{ id: 1, name: "Turma Padrão", catechist: "" }];
-                        saveClasses();
-                        renderClasses();
-                        selectClass(1);
-                    }
-                    showToast("Turma excluída com sucesso!", "bg-red-500");
+    /**
+     * Displays the attendance history for a specific student in a modal.
+     * @param {number} studentId - The ID of the student.
+     */
+    function showHistory(studentId) {
+        const student = students.find(s => s.id === studentId);
+        if (!student) return;
+
+        historyModalTitle.textContent = `Histórico de Presença de ${student.name}`;
+        historyListEl.innerHTML = '';
+        const dates = Object.keys(student.attendance).sort();
+
+        if (dates.length === 0) {
+            historyListEl.innerHTML = `<p class="text-center text-gray-500 mt-4">Nenhum registro de presença encontrado.</p>`;
+        } else {
+            dates.forEach(date => {
+                const dailyRecord = student.attendance[date];
+                if (dailyRecord) {
+                    const statusCatequese = dailyRecord.catequese;
+                    const statusMissa = dailyRecord.missa;
+                    const formattedDate = new Date(date + 'T12:00:00Z').toLocaleDateString('pt-BR');
+
+                    historyListEl.innerHTML += `
+                        <div class="flex flex-col p-2 rounded-lg bg-gray-100">
+                            <span class="font-bold text-gray-700 mb-1">${formattedDate}</span>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">Catequese:</span>
+                                <span class="font-semibold text-${STATUS_LABELS[statusCatequese].toLowerCase().replace(/\s/g, '_')}">${STATUS_LABELS[statusCatequese]}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">Missa:</span>
+                                <span class="font-semibold text-${STATUS_LABELS[statusMissa].toLowerCase().replace(/\s/g, '_')}">${STATUS_LABELS[statusMissa]}</span>
+                            </div>
+                        </div>
+                    `;
                 }
-            } else if (mode === 'student' && studentToDelete !== null) {
-                deleteStudent(studentToDelete);
+            });
+        }
+
+        historyModal.classList.remove('hidden');
+    }
+
+    /**
+     * Generates and displays a general attendance report.
+     */
+    function generateReport() {
+        if (students.length === 0) {
+            reportContentEl.innerHTML = `<p class="text-center text-gray-500">Nenhum catequizando para gerar relatório.</p>`;
+            return;
+        }
+        
+        const studentStats = students.map(student => {
+            const stats = {
+                catequese: {
+                    [STATUS.PRESENTE]: 0,
+                    [STATUS.FALTA]: 0,
+                    [STATUS.FALTA_JUSTIFICADA]: 0,
+                    [STATUS.FALTA_REPOSTA]: 0
+                },
+                missa: {
+                    [STATUS.PRESENTE]: 0,
+                    [STATUS.FALTA]: 0,
+                    [STATUS.FALTA_JUSTIFICADA]: 0,
+                    [STATUS.FALTA_REPOSTA]: 0
+                }
+            };
+
+            for (const date in student.attendance) {
+                const dailyAttendance = student.attendance[date];
+                if (dailyAttendance && dailyAttendance.catequese in stats.catequese) {
+                    stats.catequese[dailyAttendance.catequese]++;
+                }
+                if (dailyAttendance && dailyAttendance.missa in stats.missa) {
+                    stats.missa[dailyAttendance.missa]++;
+                }
             }
-            deleteModal.classList.add('hidden');
-            deleteModal.dataset.mode = '';
+            
+            return { name: student.name, stats };
         });
 
-        cancelDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.add('hidden');
-            studentToDelete = null;
-            deleteModal.dataset.mode = '';
+        let reportHtml = `<div class="space-y-6">`;
+        studentStats.forEach(student => {
+            reportHtml += `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-xl font-bold mb-2 text-gray-800">${student.name}</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <span class="text-lg font-semibold text-gray-700">Catequese</span>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li><span class="font-bold text-green-600">Presenças:</span> ${student.stats.catequese[STATUS.PRESENTE]}</li>
+                                <li><span class="font-bold text-red-600">Faltas:</span> ${student.stats.catequese[STATUS.FALTA]}</li>
+                                <li><span class="font-bold text-orange-600">Faltas Justificadas:</span> ${student.stats.catequese[STATUS.FALTA_JUSTIFICADA]}</li>
+                                <li><span class="font-bold text-blue-600">Faltas Repostas:</span> ${student.stats.catequese[STATUS.FALTA_REPOSTA]}</li>
+                            </ul>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-lg font-semibold text-gray-700">Missa</span>
+                            <ul class="text-sm text-gray-600 space-y-1">
+                                <li><span class="font-bold text-green-600">Presenças:</span> ${student.stats.missa[STATUS.PRESENTE]}</li>
+                                <li><span class="font-bold text-red-600">Faltas:</span> ${student.stats.missa[STATUS.FALTA]}</li>
+                                <li><span class="font-bold text-orange-600">Faltas Justificadas:</span> ${student.stats.missa[STATUS.FALTA_JUSTIFICADA]}</li>
+                                <li><span class="font-bold text-blue-600">Faltas Repostas:</span> ${student.stats.missa[STATUS.FALTA_REPOSTA]}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        reportHtml += `</div>`;
+        reportContentEl.innerHTML = reportHtml;
+        generalReportEl.classList.remove('hidden');
+    }
+
+    /**
+     * Exports the general report to a CSV file.
+     */
+    function exportReportToCSV() {
+        if (students.length === 0) {
+            showToast("Nenhum catequizando para exportar.", "bg-yellow-500");
+            return;
+        }
+
+        const header = ["Nome", "Presença Catequese", "Falta Catequese", "Falta Justificada Catequese", "Falta Reposta Catequese", "Presença Missa", "Falta Missa", "Falta Justificada Missa", "Falta Reposta Missa"];
+        const csvRows = [header.join(";")]; // Use semicolon for CSV to handle names with commas
+
+        students.forEach(student => {
+            const stats = {
+                catequese: {
+                    [STATUS.PRESENTE]: 0,
+                    [STATUS.FALTA]: 0,
+                    [STATUS.FALTA_JUSTIFICADA]: 0,
+                    [STATUS.FALTA_REPOSTA]: 0
+                },
+                missa: {
+                    [STATUS.PRESENTE]: 0,
+                    [STATUS.FALTA]: 0,
+                    [STATUS.FALTA_JUSTIFICADA]: 0,
+                    [STATUS.FALTA_REPOSTA]: 0
+                }
+            };
+            for (const date in student.attendance) {
+                const dailyAttendance = student.attendance[date];
+                if (dailyAttendance && dailyAttendance.catequese in stats.catequese) {
+                    stats.catequese[dailyAttendance.catequese]++;
+                }
+                if (dailyAttendance && dailyAttendance.missa in stats.missa) {
+                    stats.missa[dailyAttendance.missa]++;
+                }
+            }
+
+            const row = [
+                `"${student.name.replace(/"/g, '""')}"`,
+                stats.catequese[STATUS.PRESENTE],
+                stats.catequese[STATUS.FALTA],
+                stats.catequese[STATUS.FALTA_JUSTIFICADA],
+                stats.catequese[STATUS.FALTA_REPOSTA],
+                stats.missa[STATUS.PRESENTE],
+                stats.missa[STATUS.FALTA],
+                stats.missa[STATUS.FALTA_JUSTIFICADA],
+                stats.missa[STATUS.FALTA_REPOSTA]
+            ];
+            csvRows.push(row.join(";"));
         });
 
+        const csvString = csvRows.join("\n");
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute("href", url);
+        link.setAttribute("download", `relatorio_presenca_turma.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("Relatório exportado com sucesso!", "bg-green-500");
+    }
 
-        addStudentBtn.addEventListener('click', () => {
-            addStudentModal.classList.remove('hidden');
-        });
+    /**
+     * Displays a toast notification.
+     * @param {string} message - The message to display.
+     * @param {string} bgColor - The background color class (e.g., 'bg-green-500').
+     */
+    function showToast(message, bgColor) {
+        const toastEl = document.createElement('div');
+        toastEl.className = `${bgColor} text-white px-4 py-2 rounded-lg fixed bottom-4 right-4 shadow-lg transition-transform transform translate-y-full animate-slide-in-up z-50`;
+        toastEl.textContent = message;
+        document.body.appendChild(toastEl);
+        setTimeout(() => {
+            toastEl.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => toastEl.remove(), 500);
+        }, 3000);
+    }
 
-        cancelAddBtn.addEventListener('click', () => {
+    // Event Listeners
+    window.addEventListener('load', () => {
+        attendanceDateEl.value = new Date().toISOString().split('T')[0];
+        massDateEl.value = new Date().toISOString().split('T')[0];
+        loadClasses();
+        renderClasses();
+        currentClassId = classes.length > 0 ? classes[0].id : null;
+        if (currentClassId) {
+            selectClass(currentClassId);
+        }
+    });
+
+    classSelectEl.addEventListener('change', (e) => {
+        selectClass(parseInt(e.target.value));
+    });
+    
+    catechistNameInput.addEventListener('input', (e) => {
+        const currentClass = classes.find(c => c.id === currentClassId);
+        if (currentClass) {
+            currentClass.catechist = e.target.value;
+            saveClasses();
+        }
+    });
+
+    attendanceDateEl.addEventListener('change', (e) => {
+        selectedDate = e.target.value;
+        renderStudents();
+    });
+
+    massDateEl.addEventListener('change', (e) => {
+        selectedMassDate = e.target.value;
+        renderStudents();
+    });
+
+    studentListEl.addEventListener('click', (e) => {
+        const target = e.target.closest('button');
+        if (!target) return;
+
+        const studentId = parseInt(target.dataset.id);
+        const action = target.dataset.action;
+        const type = target.dataset.type;
+        const date = target.dataset.date;
+
+        if (target.classList.contains('status-btn')) {
+            toggleAttendance(studentId, type, date);
+        } else if (action === 'history') {
+            showHistory(studentId);
+        } else if (action === 'delete') {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                studentToDelete = studentId;
+                deleteModalText.textContent = `Tem certeza que deseja excluir o catequizando ${student.name}?`;
+                deleteModal.classList.remove('hidden');
+                deleteModal.dataset.mode = 'student';
+            }
+        }
+    });
+
+    // Class Modal Logic
+    addClassBtn.addEventListener('click', () => {
+        classModalTitle.textContent = "Nova Turma";
+        classNameInput.value = '';
+        classNameInput.dataset.mode = 'add';
+        classModal.classList.remove('hidden');
+    });
+
+    editClassBtn.addEventListener('click', () => {
+        const currentClass = classes.find(c => c.id === currentClassId);
+        if (!currentClass) {
+            showToast("Nenhuma turma selecionada para editar.", "bg-yellow-500");
+            return;
+        }
+        classModalTitle.textContent = "Editar Turma";
+        classNameInput.value = currentClass.name;
+        classNameInput.dataset.mode = 'edit';
+        classModal.classList.remove('hidden');
+    });
+
+    cancelClassBtn.addEventListener('click', () => {
+        classModal.classList.add('hidden');
+    });
+    
+    saveClassBtn.addEventListener('click', () => {
+        const name = classNameInput.value.trim();
+        if (!name) {
+            showToast("Por favor, digite um nome para a turma.", "bg-yellow-500");
+            return;
+        }
+        const mode = classNameInput.dataset.mode;
+        
+        if (mode === 'add') {
+            const newId = classes.length > 0 ? Math.max(...classes.map(c => c.id)) + 1 : 1;
+            classes.push({ id: newId, name: name, catechist: "" });
+            selectClass(newId);
+            showToast("Turma adicionada com sucesso!", "bg-green-500");
+        } else if (mode === 'edit') {
+            const currentClass = classes.find(c => c.id === currentClassId);
+            if (currentClass) {
+                currentClass.name = name;
+                showToast("Turma editada com sucesso!", "bg-green-500");
+            }
+        }
+        saveClasses();
+        renderClasses();
+        classModal.classList.add('hidden');
+    });
+    
+    deleteClassBtn.addEventListener('click', () => {
+        if (classes.length <= 1) {
+            showToast("Não é possível excluir a última turma.", "bg-yellow-500");
+            return;
+        }
+        const currentClass = classes.find(c => c.id === currentClassId);
+        deleteModalText.textContent = `Tem certeza que deseja excluir a turma "${currentClass.name}"? Esta ação não pode ser desfeita.`;
+        deleteModal.classList.remove('hidden');
+        deleteModal.dataset.mode = 'class';
+    });
+
+    // Student & Class delete confirmation logic
+    confirmDeleteBtn.addEventListener('click', () => {
+        const mode = deleteModal.dataset.mode;
+        if (mode === 'class') {
+            // Delete class
+            const index = classes.findIndex(c => c.id === currentClassId);
+            if (index > -1) {
+                localStorage.removeItem(APP_PREFIX + currentClassId);
+                classes.splice(index, 1);
+                saveClasses();
+                const newClassId = classes.length > 0 ? classes[0].id : null;
+                currentClassId = newClassId;
+                renderClasses();
+                if (newClassId) {
+                    selectClass(newClassId);
+                } else {
+                    // Create a new default class if all are deleted
+                    classes = [{ id: 1, name: "Turma Padrão", catechist: "" }];
+                    saveClasses();
+                    renderClasses();
+                    selectClass(1);
+                }
+                showToast("Turma excluída com sucesso!", "bg-red-500");
+            }
+        } else if (mode === 'student' && studentToDelete !== null) {
+            deleteStudent(studentToDelete);
+        }
+        deleteModal.classList.add('hidden');
+        deleteModal.dataset.mode = '';
+    });
+
+    cancelDeleteBtn.addEventListener('click', () => {
+        deleteModal.classList.add('hidden');
+        studentToDelete = null;
+        deleteModal.dataset.mode = '';
+    });
+
+
+    addStudentBtn.addEventListener('click', () => {
+        addStudentModal.classList.remove('hidden');
+    });
+
+    cancelAddBtn.addEventListener('click', () => {
+        newStudentNameInput.value = '';
+        addStudentModal.classList.add('hidden');
+    });
+
+    saveStudentBtn.addEventListener('click', () => {
+        const name = newStudentNameInput.value;
+        if (name) {
+            addStudent(name);
             newStudentNameInput.value = '';
             addStudentModal.classList.add('hidden');
-        });
+        }
+    });
 
-        saveStudentBtn.addEventListener('click', () => {
-            const name = newStudentNameInput.value;
-            if (name) {
-                addStudent(name);
-                newStudentNameInput.value = '';
-                addStudentModal.classList.add('hidden');
-            }
-        });
+    importStudentsBtn.addEventListener('click', () => {
+        importStudentsModal.classList.remove('hidden');
+        importStudentListTextarea.focus();
+    });
 
-        importStudentsBtn.addEventListener('click', () => {
-            importStudentsModal.classList.remove('hidden');
-            importStudentListTextarea.focus();
-        });
-
-        saveImportedStudentsBtn.addEventListener('click', () => {
-            const namesString = importStudentListTextarea.value;
-            if (namesString) {
-                importStudents(namesString);
-                importStudentListTextarea.value = '';
-                importStudentsModal.classList.add('hidden');
-            }
-        });
-
-        cancelImportBtn.addEventListener('click', () => {
+    saveImportedStudentsBtn.addEventListener('click', () => {
+        const namesString = importStudentListTextarea.value;
+        if (namesString) {
+            importStudents(namesString);
             importStudentListTextarea.value = '';
             importStudentsModal.classList.add('hidden');
-        });
+        }
+    });
 
-        closeHistoryBtn.addEventListener('click', () => {
-            historyModal.classList.add('hidden');
-        });
+    cancelImportBtn.addEventListener('click', () => {
+        importStudentListTextarea.value = '';
+        importStudentsModal.classList.add('hidden');
+    });
 
-        showReportBtn.addEventListener('click', () => {
-            if (generalReportEl.classList.contains('hidden')) {
-                generateReport();
-            } else {
-                generalReportEl.classList.add('hidden');
-            }
-        });
-        
-        exportReportBtn.addEventListener('click', exportReportToCSV);
+    closeHistoryBtn.addEventListener('click', () => {
+        historyModal.classList.add('hidden');
+    });
 
-        accessClassBtn.addEventListener('click', () => {
-            if (currentClassId) {
-                window.location.href = `class_attendance.html?classId=${currentClassId}`;
-            } else {
-                showToast("Por favor, selecione uma turma.", "bg-yellow-500");
-            }
-        });
+    showReportBtn.addEventListener('click', () => {
+        if (generalReportEl.classList.contains('hidden')) {
+            generateReport();
+        } else {
+            generalReportEl.classList.add('hidden');
+        }
+    });
+    
+    exportReportBtn.addEventListener('click', exportReportToCSV);
 
-        classNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                saveClassBtn.click();
-            }
-        });
+    accessClassBtn.addEventListener('click', () => {
+        if (currentClassId) {
+            window.location.href = `class_attendance.html?classId=${currentClassId}`;
+        } else {
+            showToast("Por favor, selecione uma turma.", "bg-yellow-500");
+        }
+    });
 
-        newStudentNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                saveStudentBtn.click();
-            }
-        });
-        
-        importStudentListTextarea.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                saveImportedStudentsBtn.click();
-            }
-        });
-    </script>
+    classNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            saveClassBtn.click();
+        }
+    });
+
+    newStudentNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            saveStudentBtn.click();
+        }
+    });
+    
+    importStudentListTextarea.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            saveImportedStudentsBtn.click();
+        }
+    });
+</script>
+
 </body>
 </html>
