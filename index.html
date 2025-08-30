@@ -386,7 +386,7 @@
             loadStudents();
             renderStudents();
             
-            const currentClass = classes.find(c => c.id === currentClassId);
+            const currentClass = classes.find(c => c.id == currentClassId);
             catechistNameInput.value = currentClass ? currentClass.catechist : "";
         }
 
@@ -405,10 +405,7 @@
                         students = loadedData;
                     }
                 } else {
-                    students = [
-                        { id: 1, name: "Ana Maria Santos", attendance: {} },
-                        { id: 2, name: "João Pedro Costa", attendance: {} }
-                    ];
+                    students = [];
                     saveStudents();
                 }
             } catch (error) {
@@ -592,8 +589,8 @@
                 dates.forEach(date => {
                     const dailyRecord = student.attendance[date];
                     if (dailyRecord) {
-                        const statusCatequese = dailyRecord.catequese;
-                        const statusMissa = dailyRecord.missa;
+                        const statusCatequese = dailyRecord.catequese || STATUS.UNKNOWN;
+                        const statusMissa = dailyRecord.missa || STATUS.UNKNOWN;
                         const formattedDate = new Date(date + 'T12:00:00Z').toLocaleDateString('pt-BR');
 
                         historyListEl.innerHTML += `
@@ -601,11 +598,11 @@
                                 <span class="font-bold text-gray-700 mb-1">${formattedDate}</span>
                                 <div class="flex justify-between items-center text-sm">
                                     <span class="text-gray-600">Catequese:</span>
-                                    <span class="font-semibold text-${STATUS_LABELS[statusCatequese].toLowerCase().replace(/\s/g, '_')}">${STATUS_LABELS[statusCatequese]}</span>
+                                    <span class="font-semibold text-${(STATUS_LABELS[statusCatequese] || 'Desconhecido').toLowerCase().replace(/\s/g, '_')}">${(STATUS_LABELS[statusCatequese] || 'Desconhecido')}</span>
                                 </div>
                                 <div class="flex justify-between items-center text-sm">
                                     <span class="text-gray-600">Missa:</span>
-                                    <span class="font-semibold text-${STATUS_LABELS[statusMissa].toLowerCase().replace(/\s/g, '_')}">${STATUS_LABELS[statusMissa]}</span>
+                                    <span class="font-semibold text-${(STATUS_LABELS[statusMissa] || 'Desconhecido').toLowerCase().replace(/\s/g, '_')}">${(STATUS_LABELS[statusMissa] || 'Desconhecido')}</span>
                                 </div>
                             </div>
                         `;
@@ -783,9 +780,9 @@
         classSelectEl.addEventListener('change', (e) => {
             selectClass(parseInt(e.target.value));
         });
-        
+    
         catechistNameInput.addEventListener('input', (e) => {
-            const currentClass = classes.find(c => c.id === currentClassId);
+            const currentClass = classes.find(c => c.id == currentClassId);
             if (currentClass) {
                 currentClass.catechist = e.target.value;
                 saveClasses();
@@ -835,7 +832,7 @@
         });
 
         editClassBtn.addEventListener('click', () => {
-            const currentClass = classes.find(c => c.id === currentClassId);
+            const currentClass = classes.find(c => c.id == currentClassId);
             if (!currentClass) {
                 showToast("Nenhuma turma selecionada para editar.", "bg-yellow-500");
                 return;
@@ -849,7 +846,7 @@
         cancelClassBtn.addEventListener('click', () => {
             classModal.classList.add('hidden');
         });
-        
+    
         saveClassBtn.addEventListener('click', () => {
             const name = classNameInput.value.trim();
             if (!name) {
@@ -861,10 +858,10 @@
             if (mode === 'add') {
                 const newId = classes.length > 0 ? Math.max(...classes.map(c => c.id)) + 1 : 1;
                 classes.push({ id: newId, name: name, catechist: "" });
-                selectClass(newId);
+                currentClassId = newId;
                 showToast("Turma adicionada com sucesso!", "bg-green-500");
             } else if (mode === 'edit') {
-                const currentClass = classes.find(c => c.id === currentClassId);
+                const currentClass = classes.find(c => c.id == currentClassId);
                 if (currentClass) {
                     currentClass.name = name;
                     showToast("Turma editada com sucesso!", "bg-green-500");
@@ -872,15 +869,16 @@
             }
             saveClasses();
             renderClasses();
+            selectClass(currentClassId);
             classModal.classList.add('hidden');
         });
-        
+    
         deleteClassBtn.addEventListener('click', () => {
             if (classes.length <= 1) {
                 showToast("Não é possível excluir a última turma.", "bg-yellow-500");
                 return;
             }
-            const currentClass = classes.find(c => c.id === currentClassId);
+            const currentClass = classes.find(c => c.id == currentClassId);
             deleteModalText.textContent = `Tem certeza que deseja excluir a turma "${currentClass.name}"? Esta ação não pode ser desfeita.`;
             deleteModal.classList.remove('hidden');
             deleteModal.dataset.mode = 'class';
@@ -891,7 +889,7 @@
             const mode = deleteModal.dataset.mode;
             if (mode === 'class') {
                 // Delete class
-                const index = classes.findIndex(c => c.id === currentClassId);
+                const index = classes.findIndex(c => c.id == currentClassId);
                 if (index > -1) {
                     localStorage.removeItem(APP_PREFIX + currentClassId);
                     classes.splice(index, 1);
