@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Presença por Turma</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -237,12 +236,27 @@
         </div>
     </div>
 
-    <!-- JavaScript for application logic -->
+    <!-- Firebase SDKs for Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script>
-        const APP_PREFIX = 'attendance-tracker-app-';
-        const CLASSES_KEY = 'attendance-tracker-classes';
-        
-        // Enum-like object for attendance statuses
+        const firebaseConfig = {
+            // Cole a sua configuração do Firebase aqui
+            apiKey: "AIzaSyDqn5MejlYyNmXK-OZayhOZ5SrzN3YcNCM",
+            authDomain: "dados-catequese.firebaseapp.com",
+            databaseURL: "https://dados-catequese-default-rtdb.firebaseio.com",
+            projectId: "dados-catequese",
+            storageBucket: "dados-catequese.firebasestorage.app",
+            messagingSenderId: "420948905617",
+            appId: "1:420948905617:web:b08e29cf50873ff804f930",
+            measurementId: "G-1G9ZF484M5"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Constants and variables
+        const CLASSES_PATH = 'classes/';
+        const STUDENTS_PATH = 'students/';
         const STATUS = {
             UNKNOWN: 'unknown',
             PRESENTE: 'presente',
@@ -250,7 +264,6 @@
             FALTA_JUSTIFICADA: 'falta_justificada',
             FALTA_REPOSTA: 'falta_reposta'
         };
-
         const STATUS_LABELS = {
             [STATUS.UNKNOWN]: 'Não Marcado',
             [STATUS.PRESENTE]: 'Presença',
@@ -258,8 +271,6 @@
             [STATUS.FALTA_JUSTIFICADA]: 'Falta Justificada',
             [STATUS.FALTA_REPOSTA]: 'Falta Reposta'
         };
-
-        // Get DOM elements
         const studentListEl = document.getElementById('student-list');
         const attendanceDateEl = document.getElementById('attendance-date');
         const massDateEl = document.getElementById('mass-date');
@@ -275,29 +286,23 @@
         const accessClassBtn = document.getElementById('access-class-btn');
         const exportReportBtn = document.getElementById('export-report-btn');
         const catechistNameInput = document.getElementById('catechist-name-input');
-
-        // Modals and their elements
         const classModal = document.getElementById('class-modal');
         const classModalTitle = document.getElementById('class-modal-title');
         const classNameInput = document.getElementById('class-name-input');
         const saveClassBtn = document.getElementById('save-class-btn');
         const cancelClassBtn = document.getElementById('cancel-class-btn');
-
         const addStudentModal = document.getElementById('add-student-modal');
         const newStudentNameInput = document.getElementById('new-student-name');
         const saveStudentBtn = document.getElementById('save-student-btn');
         const cancelAddBtn = document.getElementById('cancel-add-btn');
-        
         const importStudentsModal = document.getElementById('import-students-modal');
         const importStudentListTextarea = document.getElementById('import-student-list');
         const saveImportedStudentsBtn = document.getElementById('save-imported-students-btn');
         const cancelImportBtn = document.getElementById('cancel-import-btn');
-
         const historyModal = document.getElementById('history-modal');
         const historyModalTitle = document.getElementById('history-modal-title');
         const historyListEl = document.getElementById('history-list');
         const closeHistoryBtn = document.getElementById('close-history-btn');
-
         const deleteModal = document.getElementById('delete-modal');
         const deleteModalText = document.getElementById('delete-modal-text');
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
@@ -310,60 +315,108 @@
         let selectedMassDate = new Date().toISOString().split('T')[0];
         let studentToDelete = null;
 
-        /**
-         * Migrates old data format to the new format.
-         * The old format had a boolean value for attendance. The new one is a string.
-         */
-        function migrateData(data) {
-            return data.map(student => {
-                const newAttendance = {};
-                for (const date in student.attendance) {
-                    // Check if the old attendance is a boolean
-                    if (typeof student.attendance[date] === 'boolean') {
-                        newAttendance[date] = {
-                            catequese: student.attendance[date] ? STATUS.PRESENTE : STATUS.FALTA,
-                            missa: STATUS.UNKNOWN
-                        };
-                    } else {
-                        // Data is already in the new format, just copy it
-                        newAttendance[date] = student.attendance[date];
-                    }
+        // Firebase logic for Realtime Database
+        function loadClassesFromFirebase() {
+            db.ref(CLASSES_PATH).on('value', snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    classes = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                } else {
+                    classes = [];
                 }
-                return { ...student, attendance: newAttendance };
+                renderClasses();
+                if (!currentClassId && classes.length > 0) {
+                    selectClass(classes[0].id);
+                } else if (currentClassId && !classes.find(c => c.id === currentClassId)) {
+                    // Handle case where current class was deleted
+                    selectClass(classes.length > 0 ? classes[0].id : null);
+                }
+            }, err => {
+                console.error("Erro ao carregar turmas:", err);
             });
         }
-
-        /**
-         * Loads all classes from local storage.
-         */
-        function loadClasses() {
-            try {
-                const storedClasses = localStorage.getItem(CLASSES_KEY);
-                if (storedClasses) {
-                    classes = JSON.parse(storedClasses);
+        
+        function loadStudentsFromFirebase(classId) {
+            if (!classId) {
+                students = [];
+                renderStudents();
+                return;
+            }
+            db.ref(CLASSES_PATH + classId + '/' + STUDENTS_PATH).on('value', snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    students = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                 } else {
-                    classes = [{ id: 1, name: "Turma Padrão", catechist: "" }];
-                    saveClasses();
+                    students = [];
                 }
-            } catch (error) {
-                console.error("Failed to load classes from local storage:", error);
-            }
+                renderStudents();
+            }, err => {
+                console.error("Erro ao carregar catequizandos:", err);
+            });
         }
-
-        /**
-         * Saves all classes to local storage.
-         */
-        function saveClasses() {
+        
+        async function saveClassToFirebase(mode, classData) {
             try {
-                localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
-            } catch (error) {
-                console.error("Failed to save classes to local storage:", error);
+                if (mode === 'add') {
+                    await db.ref(CLASSES_PATH).push(classData);
+                    showToast("Turma adicionada com sucesso!", "bg-green-500");
+                } else if (mode === 'edit') {
+                    await db.ref(CLASSES_PATH + classData.id).update({ name: classData.name });
+                    showToast("Turma editada com sucesso!", "bg-green-500");
+                }
+            } catch (e) {
+                console.error("Erro ao salvar turma:", e);
+                showToast("Erro ao salvar turma.", "bg-red-500");
             }
         }
-
-        /**
-         * Renders the list of classes in the select dropdown.
-         */
+        
+        async function deleteClassFromFirebase(classId) {
+            try {
+                await db.ref(CLASSES_PATH + classId).remove();
+                showToast("Turma excluída com sucesso!", "bg-red-500");
+            } catch (e) {
+                console.error("Erro ao excluir turma:", e);
+                showToast("Erro ao excluir turma.", "bg-red-500");
+            }
+        }
+        
+        async function addStudentToFirebase(name) {
+            if (!currentClassId) return;
+            try {
+                await db.ref(CLASSES_PATH + currentClassId + '/' + STUDENTS_PATH).push({
+                    name: name.trim(),
+                    attendance: {}
+                });
+                showToast("Catequizando adicionado com sucesso!", "bg-green-500");
+            } catch (e) {
+                console.error("Erro ao adicionar catequizando:", e);
+                showToast("Erro ao adicionar catequizando.", "bg-red-500");
+            }
+        }
+        
+        async function updateAttendanceInFirebase(studentId, date, type, newStatus) {
+            if (!currentClassId) return;
+            try {
+                const studentRef = db.ref(CLASSES_PATH + currentClassId + '/' + STUDENTS_PATH + studentId);
+                const attendancePath = `attendance/${date}/${type}`;
+                await studentRef.child(attendancePath).set(newStatus);
+            } catch (e) {
+                console.error("Erro ao atualizar presença:", e);
+                showToast("Erro ao atualizar presença.", "bg-red-500");
+            }
+        }
+        
+        async function deleteStudentFromFirebase(studentId) {
+            if (!currentClassId) return;
+            try {
+                await db.ref(CLASSES_PATH + currentClassId + '/' + STUDENTS_PATH + studentId).remove();
+                showToast("Catequizando excluído com sucesso.", "bg-red-500");
+            } catch (e) {
+                console.error("Erro ao excluir catequizando:", e);
+                showToast("Erro ao excluir catequizando.", "bg-red-500");
+            }
+        }
+        
         function renderClasses() {
             classSelectEl.innerHTML = '';
             classes.forEach(cls => {
@@ -377,57 +430,13 @@
             }
         }
 
-        /**
-         * Sets the current class and loads its students.
-         * @param {number} classId - The ID of the class to select.
-         */
         function selectClass(classId) {
             currentClassId = classId;
-            loadStudents();
-            renderStudents();
-            
-            const currentClass = classes.find(c => c.id == currentClassId);
+            loadStudentsFromFirebase(currentClassId);
+            const currentClass = classes.find(c => c.id === currentClassId);
             catechistNameInput.value = currentClass ? currentClass.catechist : "";
         }
-
-        /**
-         * Loads students data for the current class from local storage.
-         */
-        function loadStudents() {
-            try {
-                const storedData = localStorage.getItem(APP_PREFIX + currentClassId);
-                if (storedData) {
-                    const loadedData = JSON.parse(storedData);
-                    if (loadedData.some(s => Object.values(s.attendance).some(val => typeof val === 'boolean'))) {
-                        students = migrateData(loadedData);
-                        saveStudents();
-                    } else {
-                        students = loadedData;
-                    }
-                } else {
-                    students = [];
-                    saveStudents();
-                }
-            } catch (error) {
-                console.error("Failed to load students for class:", error);
-                students = [];
-            }
-        }
-
-        /**
-         * Saves the current students array to local storage for the current class.
-         */
-        function saveStudents() {
-            try {
-                localStorage.setItem(APP_PREFIX + currentClassId, JSON.stringify(students));
-            } catch (error) {
-                console.error("Failed to save students to local storage:", error);
-            }
-        }
-
-        /**
-         * Renders the list of students on the page.
-         */
+        
         function renderStudents() {
             studentListEl.innerHTML = '';
             if (students.length === 0) {
@@ -437,7 +446,6 @@
             students.forEach(student => {
                 const studentItem = document.createElement('div');
                 studentItem.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white rounded-lg p-4 shadow-sm gap-4";
-
                 const attendance = student.attendance[selectedDate] || { catequese: STATUS.UNKNOWN, missa: STATUS.UNKNOWN };
                 const massAttendance = (student.attendance[selectedMassDate] && student.attendance[selectedMassDate].missa) ? student.attendance[selectedMassDate].missa : STATUS.UNKNOWN;
                 
@@ -445,7 +453,6 @@
                     <div class="flex-1 min-w-0">
                         <span class="text-xl font-bold text-gray-800">${student.name}</span>
                     </div>
-                    
                     <div class="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                             <span class="text-gray-600 font-semibold text-sm">Catequese:</span>
@@ -460,7 +467,6 @@
                             </button>
                         </div>
                     </div>
-                    
                     <div class="flex gap-2 sm:self-center">
                         <button class="bg-gray-300 text-gray-700 hover:bg-gray-400 font-bold py-2 px-3 rounded-lg flex items-center justify-center transition-colors duration-300 text-sm" data-action="history" data-id="${student.id}">
                             <i class="fas fa-history"></i>
@@ -473,79 +479,12 @@
                 studentListEl.appendChild(studentItem);
             });
         }
-
-        /**
-         * Adds a single new student to the students array.
-         * @param {string} name - The name of the new student.
-         */
-        function addStudent(name) {
-            if (name.trim() === '') {
-                showToast("Por favor, digite um nome.", "bg-yellow-500");
-                return;
-            }
-            const newId = students.length > 0 ? Math.max(...students.map(s => s.id)) + 1 : 1;
-            students.push({ id: newId, name: name.trim(), attendance: {} });
-            saveStudents();
-            renderStudents();
-            showToast("Catequizando adicionado com sucesso!", "bg-green-500");
-        }
-
-        /**
-         * Adds multiple students from a list of names.
-         * @param {string} namesString - A string containing names, separated by newlines.
-         */
-        function importStudents(namesString) {
-            const names = namesString.split('\n').filter(name => name.trim() !== '');
-            if (names.length === 0) {
-                showToast("Nenhum nome foi importado. Por favor, insira um nome por linha.", "bg-yellow-500");
-                return;
-            }
-
-            let lastId = students.length > 0 ? Math.max(...students.map(s => s.id)) : 0;
-            const newStudents = names.map(name => {
-                lastId++;
-                return { id: lastId, name: name.trim(), attendance: {} };
-            });
-
-            students = students.concat(newStudents);
-            saveStudents();
-            renderStudents();
-            showToast(`${newStudents.length} catequizandos importados com sucesso!`, "bg-green-500");
-        }
-
-        /**
-         * Deletes a student from the students array.
-         * @param {number} studentId - The ID of the student to delete.
-         */
-        function deleteStudent(studentId) {
-            const index = students.findIndex(s => s.id === studentId);
-            if (index > -1) {
-                students.splice(index, 1);
-                saveStudents();
-                renderStudents();
-                showToast("Catequizando excluído com sucesso.", "bg-red-500");
-            }
-        }
         
-        /**
-         * Toggles the attendance status for a student on the selected date.
-         * @param {number} studentId - The ID of the student.
-         * @param {string} type - 'catequese' or 'missa'.
-         * @param {string} date - The date string for the record.
-         */
         function toggleAttendance(studentId, type, date) {
             const student = students.find(s => s.id === studentId);
             if (!student) return;
-
-            // Initialize the attendance object for the date if it doesn't exist
-            if (!student.attendance[date]) {
-                student.attendance[date] = { catequese: STATUS.UNKNOWN, missa: STATUS.UNKNOWN };
-            }
-            
-            const currentStatus = student.attendance[date][type];
+            const currentStatus = (student.attendance && student.attendance[date] && student.attendance[date][type]) ? student.attendance[date][type] : STATUS.UNKNOWN;
             let newStatus;
-            
-            // Cycle through statuses
             switch (currentStatus) {
                 case STATUS.UNKNOWN:
                     newStatus = STATUS.PRESENTE;
@@ -565,34 +504,25 @@
                 default:
                     newStatus = STATUS.UNKNOWN;
             }
-            
-            student.attendance[date][type] = newStatus;
-            saveStudents();
-            renderStudents();
+            updateAttendanceInFirebase(studentId, date, type, newStatus);
         }
 
-        /**
-         * Displays the attendance history for a specific student in a modal.
-         * @param {number} studentId - The ID of the student.
-         */
         function showHistory(studentId) {
             const student = students.find(s => s.id === studentId);
             if (!student) return;
-
             historyModalTitle.textContent = `Histórico de Presença de ${student.name}`;
             historyListEl.innerHTML = '';
-            const dates = Object.keys(student.attendance).sort();
-
+            const attendance = student.attendance || {};
+            const dates = Object.keys(attendance).sort();
             if (dates.length === 0) {
                 historyListEl.innerHTML = `<p class="text-center text-gray-500 mt-4">Nenhum registro de presença encontrado.</p>`;
             } else {
                 dates.forEach(date => {
-                    const dailyRecord = student.attendance[date];
+                    const dailyRecord = attendance[date];
                     if (dailyRecord) {
                         const statusCatequese = dailyRecord.catequese || STATUS.UNKNOWN;
                         const statusMissa = dailyRecord.missa || STATUS.UNKNOWN;
                         const formattedDate = new Date(date + 'T12:00:00Z').toLocaleDateString('pt-BR');
-
                         historyListEl.innerHTML += `
                             <div class="flex flex-col p-2 rounded-lg bg-gray-100">
                                 <span class="font-bold text-gray-700 mb-1">${formattedDate}</span>
@@ -609,19 +539,14 @@
                     }
                 });
             }
-
             historyModal.classList.remove('hidden');
         }
 
-        /**
-         * Generates and displays a general attendance report.
-         */
         function generateReport() {
             if (students.length === 0) {
                 reportContentEl.innerHTML = `<p class="text-center text-gray-500">Nenhum catequizando para gerar relatório.</p>`;
                 return;
             }
-            
             const studentStats = students.map(student => {
                 const stats = {
                     catequese: {
@@ -637,9 +562,9 @@
                         [STATUS.FALTA_REPOSTA]: 0
                     }
                 };
-
-                for (const date in student.attendance) {
-                    const dailyAttendance = student.attendance[date];
+                const attendance = student.attendance || {};
+                for (const date in attendance) {
+                    const dailyAttendance = attendance[date];
                     if (dailyAttendance && dailyAttendance.catequese in stats.catequese) {
                         stats.catequese[dailyAttendance.catequese]++;
                     }
@@ -647,10 +572,8 @@
                         stats.missa[dailyAttendance.missa]++;
                     }
                 }
-                
                 return { name: student.name, stats };
             });
-
             let reportHtml = `<div class="space-y-6">`;
             studentStats.forEach(student => {
                 reportHtml += `
@@ -684,18 +607,13 @@
             generalReportEl.classList.remove('hidden');
         }
 
-        /**
-         * Exports the general report to a CSV file.
-         */
         function exportReportToCSV() {
             if (students.length === 0) {
                 showToast("Nenhum catequizando para exportar.", "bg-yellow-500");
                 return;
             }
-
             const header = ["Nome", "Presença Catequese", "Falta Catequese", "Falta Justificada Catequese", "Falta Reposta Catequese", "Presença Missa", "Falta Missa", "Falta Justificada Missa", "Falta Reposta Missa"];
-            const csvRows = [header.join(";")]; // Use semicolon for CSV to handle names with commas
-
+            const csvRows = [header.join(";")];
             students.forEach(student => {
                 const stats = {
                     catequese: {
@@ -711,8 +629,9 @@
                         [STATUS.FALTA_REPOSTA]: 0
                     }
                 };
-                for (const date in student.attendance) {
-                    const dailyAttendance = student.attendance[date];
+                const attendance = student.attendance || {};
+                for (const date in attendance) {
+                    const dailyAttendance = attendance[date];
                     if (dailyAttendance && dailyAttendance.catequese in stats.catequese) {
                         stats.catequese[dailyAttendance.catequese]++;
                     }
@@ -720,7 +639,6 @@
                         stats.missa[dailyAttendance.missa]++;
                     }
                 }
-
                 const row = [
                     `"${student.name.replace(/"/g, '""')}"`,
                     stats.catequese[STATUS.PRESENTE],
@@ -734,12 +652,10 @@
                 ];
                 csvRows.push(row.join(";"));
             });
-
             const csvString = csvRows.join("\n");
             const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
-            
             link.setAttribute("href", url);
             link.setAttribute("download", `relatorio_presenca_turma.csv`);
             link.style.visibility = 'hidden';
@@ -749,11 +665,6 @@
             showToast("Relatório exportado com sucesso!", "bg-green-500");
         }
 
-        /**
-         * Displays a toast notification.
-         * @param {string} message - The message to display.
-         * @param {string} bgColor - The background color class (e.g., 'bg-green-500').
-         */
         function showToast(message, bgColor) {
             const toastEl = document.createElement('div');
             toastEl.className = `${bgColor} text-white px-4 py-2 rounded-lg fixed bottom-4 right-4 shadow-lg transition-transform transform translate-y-full animate-slide-in-up z-50`;
@@ -769,24 +680,16 @@
         window.addEventListener('load', () => {
             attendanceDateEl.value = new Date().toISOString().split('T')[0];
             massDateEl.value = new Date().toISOString().split('T')[0];
-            loadClasses();
-            renderClasses();
-            currentClassId = classes.length > 0 ? classes[0].id : null;
-            if (currentClassId) {
-                selectClass(currentClassId);
-            }
+            loadClassesFromFirebase();
         });
 
         classSelectEl.addEventListener('change', (e) => {
-            selectClass(parseInt(e.target.value));
+            selectClass(e.target.value);
         });
-    
+
         catechistNameInput.addEventListener('input', (e) => {
-            const currentClass = classes.find(c => c.id == currentClassId);
-            if (currentClass) {
-                currentClass.catechist = e.target.value;
-                saveClasses();
-            }
+            if (!currentClassId) return;
+            db.ref(CLASSES_PATH + currentClassId).update({ catechist: e.target.value });
         });
 
         attendanceDateEl.addEventListener('change', (e) => {
@@ -802,12 +705,10 @@
         studentListEl.addEventListener('click', (e) => {
             const target = e.target.closest('button');
             if (!target) return;
-
-            const studentId = parseInt(target.dataset.id);
+            const studentId = target.dataset.id;
             const action = target.dataset.action;
             const type = target.dataset.type;
             const date = target.dataset.date;
-
             if (target.classList.contains('status-btn')) {
                 toggleAttendance(studentId, type, date);
             } else if (action === 'history') {
@@ -823,7 +724,6 @@
             }
         });
 
-        // Class Modal Logic
         addClassBtn.addEventListener('click', () => {
             classModalTitle.textContent = "Nova Turma";
             classNameInput.value = '';
@@ -832,7 +732,7 @@
         });
 
         editClassBtn.addEventListener('click', () => {
-            const currentClass = classes.find(c => c.id == currentClassId);
+            const currentClass = classes.find(c => c.id === currentClassId);
             if (!currentClass) {
                 showToast("Nenhuma turma selecionada para editar.", "bg-yellow-500");
                 return;
@@ -846,73 +746,45 @@
         cancelClassBtn.addEventListener('click', () => {
             classModal.classList.add('hidden');
         });
-    
-        saveClassBtn.addEventListener('click', () => {
+
+        saveClassBtn.addEventListener('click', async () => {
             const name = classNameInput.value.trim();
             if (!name) {
                 showToast("Por favor, digite um nome para a turma.", "bg-yellow-500");
                 return;
             }
             const mode = classNameInput.dataset.mode;
-            
             if (mode === 'add') {
-                const newId = classes.length > 0 ? Math.max(...classes.map(c => c.id)) + 1 : 1;
-                classes.push({ id: newId, name: name, catechist: "" });
-                currentClassId = newId;
-                showToast("Turma adicionada com sucesso!", "bg-green-500");
+                await saveClassToFirebase(mode, { name: name, catechist: "" });
             } else if (mode === 'edit') {
-                const currentClass = classes.find(c => c.id == currentClassId);
-                if (currentClass) {
-                    currentClass.name = name;
-                    showToast("Turma editada com sucesso!", "bg-green-500");
-                }
+                await saveClassToFirebase(mode, { id: currentClassId, name: name });
             }
-            saveClasses();
-            renderClasses();
-            selectClass(currentClassId);
             classModal.classList.add('hidden');
         });
-    
+
         deleteClassBtn.addEventListener('click', () => {
             if (classes.length <= 1) {
                 showToast("Não é possível excluir a última turma.", "bg-yellow-500");
                 return;
             }
-            const currentClass = classes.find(c => c.id == currentClassId);
+            const currentClass = classes.find(c => c.id === currentClassId);
             deleteModalText.textContent = `Tem certeza que deseja excluir a turma "${currentClass.name}"? Esta ação não pode ser desfeita.`;
             deleteModal.classList.remove('hidden');
             deleteModal.dataset.mode = 'class';
         });
 
-        // Student & Class delete confirmation logic
-        confirmDeleteBtn.addEventListener('click', () => {
+        confirmDeleteBtn.addEventListener('click', async () => {
             const mode = deleteModal.dataset.mode;
             if (mode === 'class') {
-                // Delete class
-                const index = classes.findIndex(c => c.id == currentClassId);
-                if (index > -1) {
-                    localStorage.removeItem(APP_PREFIX + currentClassId);
-                    classes.splice(index, 1);
-                    saveClasses();
-                    const newClassId = classes.length > 0 ? classes[0].id : null;
-                    currentClassId = newClassId;
-                    renderClasses();
-                    if (newClassId) {
-                        selectClass(newClassId);
-                    } else {
-                        // Create a new default class if all are deleted
-                        classes = [{ id: 1, name: "Turma Padrão", catechist: "" }];
-                        saveClasses();
-                        renderClasses();
-                        selectClass(1);
-                    }
-                    showToast("Turma excluída com sucesso!", "bg-red-500");
-                }
+                await deleteClassFromFirebase(currentClassId);
+                deleteModal.classList.add('hidden');
+                deleteModal.dataset.mode = '';
             } else if (mode === 'student' && studentToDelete !== null) {
-                deleteStudent(studentToDelete);
+                await deleteStudentFromFirebase(studentToDelete);
+                deleteModal.classList.add('hidden');
+                deleteModal.dataset.mode = '';
+                studentToDelete = null;
             }
-            deleteModal.classList.add('hidden');
-            deleteModal.dataset.mode = '';
         });
 
         cancelDeleteBtn.addEventListener('click', () => {
@@ -920,7 +792,6 @@
             studentToDelete = null;
             deleteModal.dataset.mode = '';
         });
-
 
         addStudentBtn.addEventListener('click', () => {
             addStudentModal.classList.remove('hidden');
@@ -931,10 +802,10 @@
             addStudentModal.classList.add('hidden');
         });
 
-        saveStudentBtn.addEventListener('click', () => {
+        saveStudentBtn.addEventListener('click', async () => {
             const name = newStudentNameInput.value;
             if (name) {
-                addStudent(name);
+                await addStudentToFirebase(name);
                 newStudentNameInput.value = '';
                 addStudentModal.classList.add('hidden');
             }
@@ -945,10 +816,23 @@
             importStudentListTextarea.focus();
         });
 
-        saveImportedStudentsBtn.addEventListener('click', () => {
+        saveImportedStudentsBtn.addEventListener('click', async () => {
             const namesString = importStudentListTextarea.value;
             if (namesString) {
-                importStudents(namesString);
+                const names = namesString.split('\n').filter(name => name.trim() !== '');
+                if (names.length === 0) {
+                    showToast("Nenhum nome foi importado. Por favor, insira um nome por linha.", "bg-yellow-500");
+                    return;
+                }
+                const updates = {};
+                names.forEach(name => {
+                    updates[CLASSES_PATH + currentClassId + '/' + STUDENTS_PATH + db.ref().push().key] = {
+                        name: name.trim(),
+                        attendance: {}
+                    };
+                });
+                await db.ref().update(updates);
+                showToast(`${names.length} catequizandos importados com sucesso!`, "bg-green-500");
                 importStudentListTextarea.value = '';
                 importStudentsModal.classList.add('hidden');
             }
