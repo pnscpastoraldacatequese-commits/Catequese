@@ -236,19 +236,19 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs for Realtime Database -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <!-- Firebase SDKs for Realtime Database (v8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script>
         // Substitua os dados abaixo com a sua firebaseConfig
         const firebaseConfig = {
-            apiKey: "AIzaSyDqn5MejlYyNmXK-OZayhOZ5SrzN3YcNCM",
-            authDomain: "dados-catequese.firebaseapp.com",
-            databaseURL: "https://dados-catequese-default-rtdb.firebaseio.com",
-            projectId: "dados-catequese",
-            storageBucket: "dados-catequese.firebasestorage.app",
-            messagingSenderId: "420948905617",
-            appId: "1:420948905617:web:b08e29cf50873ff804f930"
+            apiKey: "SEU_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            databaseURL: "SEU_DATABASE_URL",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SEU_APP_ID"
         };
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
